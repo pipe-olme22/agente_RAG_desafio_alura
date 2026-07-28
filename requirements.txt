@@ -11,3 +11,4 @@ pydantic
 openpyxl
 pandas
 python-dotenv
+langchain-groq
