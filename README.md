@@ -7,14 +7,15 @@ Este proyecto implementa un agente de asistencia corporativa para Mercado Centra
 
 La solución combina:
 - un modelo de lenguaje Gemini a través de `langchain-google-genai`,
+- Groq (Llama 3.1) para la inferencia de lenguaje, logrando respuestas ultrarrápidas,
 - un índice vectorial FAISS para recuperación de información,
 - y un flujo de decisión con `langgraph` para clasificar consultas en triage, respuesta automática o apertura de ticket.
 
 ## Arquitectura de la solución
 
 1. `app.py`
-   - Carga la clave de API de Gemini desde `.env` o `.streamlit/secrets.toml`.
-   - Inicializa el modelo de chat y el modelo de embeddings de Google Gemini.
+   - Carga las claves de API (Gemini para embeddings y Groq para chat) desde .env o .streamlit/secrets.toml.
+   - Inicializa el modelo de chat con Groq (Llama 3.1) para baja latencia y el modelo de embeddings con Google Gemini.
    - Carga el índice FAISS local (`indice_faiss_mercado/`) que contiene los vectores de los documentos.
    - Utiliza un grafo de estados (`StateGraph`) para decidir si la consulta se resuelve con RAG, se pide más información o se marca como ticket.
    - Usa un prompt de triage estructurado para clasificar la intención y urgencia.
@@ -47,6 +48,8 @@ La solución combina:
 - openpyxl
 - langchain-google-genai
 - langchain-community
+- Groq API
+- langchain-groq
 
 ## Instrucciones para ejecutar el proyecto
 
@@ -70,15 +73,15 @@ pip install -r requirements.txt
 Ejemplo de `.env`:
 
 ```env
-GEMINI_API_KEY="tu_api_key_aqui"
-GEMINI_MODEL=gemini-2.5-flash
-GEMINI_EMBEDDING_MODEL=gemini-embedding-001
+GEMINI_API_KEY="tu_api_key_de_google"
+GROQ_API_KEY="tu_api_key_de_groq"
 ```
 
 Ejemplo de `.streamlit/secrets.toml`:
 
 ```toml
-GEMINI_API_KEY = "tu_api_key_aqui"
+GEMINI_API_KEY="tu_api_key_de_google"
+GROQ_API_KEY="tu_api_key_de_groq"
 ```
 
 5. Si no dispones del índice FAISS, ejecútalo una vez para construirlo:
@@ -116,3 +119,4 @@ streamlit run app.py
 - No incluyas tu clave real de API en el repositorio.
 - Si el modelo configurado no está disponible para tu cuenta, cambia `GEMINI_MODEL` en `.env` a un modelo compatible como `gemini-2.5-flash`, `gemini-2.5-pro` o `gemini-2.0-flash`.
 - Asegúrate de ejecutar `python construir_indice.py` cada vez que actualices los documentos de `documentos/`.
+- Este proyecto utiliza Llama 3.1-8b-instant a través de Groq para optimizar la velocidad de respuesta del agente, manteniendo a Gemini únicamente para la generación de vectores (embeddings).
